@@ -1,1 +1,2 @@
-This is my lgbook
+This is my lgbook.
+This will have some changes
