@@ -1,0 +1,21 @@
+I) Methodology/Approach Used for the Project
+
+Text input is taken through direct input or file upload.
+
+Preprocessing is done using tokenization, stopword removal, and stemming.
+
+Text similarity is computed using NLP-based algorithms.
+
+The system generates a plagiarism report highlighting similarities.
+
+The output is displayed with a similarity percentage and highlighted duplicate sections.
+
+II) Materials, Tools, and Software Required for the Project
+
+Programming Language: Python
+
+Libraries: NLTK, Scikit-learn, PyPDF2, Docx, Flask (for UI)
+
+IDE: Visual Studio Code, Jupyter Notebook
+
+Database: SQLite (if storage is required)
