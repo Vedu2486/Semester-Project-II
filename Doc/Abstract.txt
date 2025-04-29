@@ -1,0 +1,12 @@
+Plagiarism is a critical issue in academic and professional fields. It undermines the integrity of research, devalues original thinking, and affects the credibility of institutions. With the exponential growth of digital content, it has become increasingly difficult to detect copied or rephrased material manually.
+
+This project, *Simple Plagiarism Checker*, addresses this challenge by implementing an efficient, easy-to-use system that detects plagiarism through text similarity algorithms. The aim is to create a tool that is accessible to students, educators, and researchers who need to verify content authenticity without relying on expensive software.
+
+Key features of this project include:
+
+- Detection of both exact and partially paraphrased content.
+- Use of powerful text similarity algorithms such as Cosine Similarity, Jaccard Similarity, and Levenshtein Distance.
+- A straightforward interface for uploading and comparing documents.
+- A detailed report generation with percentage-based results and highlighted similarities.
+
+This tool not only encourages academic honesty but also supports users in improving the originality of their work.
