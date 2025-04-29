@@ -1,0 +1,23 @@
+Detecting plagiarism has been a focus of both academic research and commercial application development. Multiple tools and techniques have evolved over time, each with its strengths and limitations.
+
+**Existing Tools and Techniques**
+
+1. **Turnitin**: One of the most widely used tools, it compares student submissions with a vast database of academic content. However, it is subscription-based and not accessible to everyone.
+2. **Grammarly’s plagiarism tool**: Offers basic plagiarism checking as part of its premium services. Useful for general content but limited for academic verification.
+3. **Open-source methods**: Include use of algorithms like fingerprinting, n-gram comparison, and edit distance. These tools are often underdeveloped or limited to text formats.
+
+**Relevant Technologies**
+
+- **Natural Language Processing (NLP)**: Helps preprocess and normalize text for better comparison.
+- **Cosine Similarity**: Evaluates how similar two documents are based on word vector angles.
+- **Levenshtein Distance**: Calculates the number of edits between two strings, useful for paraphrased content.
+- **Jaccard Index**: Measures similarity based on the intersection and union of token sets.
+
+**Summary of Learnings**
+
+- Combining multiple algorithms improves overall detection accuracy.
+- Text preprocessing (tokenization, stemming, stop-word removal) significantly enhances results.
+- A lightweight, offline system can be beneficial in low-resource environments.
+
+---
+
