@@ -1,0 +1,32 @@
+**Methodology / Approach**
+
+The development process was broken down into several phases:
+
+1. **Requirement Analysis**: Identifying the need for an offline, easy-to-use tool.
+2. **Tool and Library Selection**: Python was selected due to its extensive libraries for NLP and file processing.
+3. **Text Preprocessing**: Includes tokenization, stemming, and stop-word removal using the `nltk` library.
+4. **Similarity Calculation**:
+   - **Cosine Similarity** for angle-based text vector comparison.
+   - **Levenshtein Distance** to catch reworded or paraphrased content.
+   - **Jaccard Index** for set-based similarity detection.
+5. **Interface Design**: A CLI or simple GUI that allows users to upload or paste text.
+6. **Testing**: The system was tested on documents with varying lengths and plagiarism levels.
+
+**Tools, Materials, and Software Used**
+
+- **Python**: Core language for implementation.
+- **NLTK**: Used for text preprocessing.
+- **Scikit-learn**: Utilized for Cosine Similarity.
+- **PyPDF2 & python-docx**: For reading PDF and Word documents.
+- **IDE**: VS Code and Jupyter Notebook.
+- **Optional**: Flask for web interface, SQLite for storing comparisons if extended.
+
+**Planning Milestones**
+
+- Week 1–2: Research and library testing.
+- Week 3–4: Development of preprocessing and similarity modules.
+- Week 5–6: Integration and testing with various document formats.
+- Week 7: Finalization and documentation.
+
+---
+

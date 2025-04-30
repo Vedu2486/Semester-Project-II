@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file
 import os
 import tempfile
-from file_handler import FileHandler
 from werkzeug.utils import secure_filename
 import nltk
 from nltk.corpus import stopwords
@@ -10,6 +9,62 @@ import random
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
+# Import ReportLab for PDF generation
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+import PyPDF2
+import docx
+
+class FileHandler:
+    def __init__(self):
+        self.supported_extensions = ['.txt', '.pdf', '.docx']
+    
+    def is_supported_file(self, filename):
+        _, ext = os.path.splitext(filename)
+        return ext.lower() in self.supported_extensions
+    
+    def extract_text_from_file(self, file_path):
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        _, ext = os.path.splitext(file_path)
+        ext = ext.lower()
+        
+        if ext not in self.supported_extensions:
+            raise ValueError(f"Unsupported file type: {ext}")
+        
+        if ext == '.txt':
+            return self._extract_from_txt(file_path)
+        elif ext == '.pdf':
+            return self._extract_from_pdf(file_path)
+        elif ext == '.docx':
+            return self._extract_from_docx(file_path)
+    
+    def _extract_from_txt(self, file_path):
+        """Extract text from a txt file"""
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    
+    def _extract_from_pdf(self, file_path):
+        """Extract text from a PDF file"""
+        text = ""
+        with open(file_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            for page_num in range(len(pdf_reader.pages)):
+                page = pdf_reader.pages[page_num]
+                text += page.extract_text()
+        return text
+    
+    def _extract_from_docx(self, file_path):
+        """Extract text from a DOCX file"""
+        doc = docx.Document(file_path)
+        full_text = []
+        for para in doc.paragraphs:
+            full_text.append(para.text)
+        return '\n'.join(full_text)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -29,129 +84,7 @@ except LookupError:
     nltk.download('punkt')
     nltk.download('stopwords')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/check-text', methods=['POST'])
-def check_text():
-    # Get original text from the form
-    original_text = request.form.get('original_text', '')
-    
-    if not original_text:
-        return jsonify({'error': 'Text is required'}), 400
-    
-    # Analyze text for plagiarism
-    report = analyze_plagiarism(original_text)
-    
-    # Generate temporary file for the report
-    fd, path = tempfile.mkstemp(suffix='.txt', prefix='report_')
-    os.close(fd)
-    
-    # Save report to the temporary file
-    with open(path, 'w', encoding='utf-8') as file:
-        file.write(format_report_as_text(report))
-    
-    # Return the results
-    return jsonify({
-        'similarity_scores': {
-            'cosine_similarity': f"{report['plagiarism_score']}%",
-            'jaccard_similarity': f"{report['content_score']}%", 
-            'average_similarity': f"{report['average_score']}%"
-        },
-        'plagiarism_level': report['plagiarism_level'],
-        'highlighted_content': report['highlighted_content'],
-        'report_path': path
-    })
-
-@app.route('/check-files', methods=['POST'])
-def check_files():
-    # Check if file was uploaded
-    if 'original_file' not in request.files:
-        return jsonify({'error': 'File is required'}), 400
-    
-    original_file = request.files['original_file']
-    
-    # Check if filename is empty
-    if original_file.filename == '':
-        return jsonify({'error': 'File is required'}), 400
-    
-    # Save the uploaded file
-    original_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(original_file.filename))
-    original_file.save(original_path)
-    
-    try:
-        # Extract text from file
-        file_text = file_handler.extract_text_from_file(original_path)
-        
-        # Analyze text for plagiarism
-        report = analyze_plagiarism(file_text)
-        
-        # Generate temporary file for the report
-        fd, path = tempfile.mkstemp(suffix='.txt', prefix='report_')
-        os.close(fd)
-        
-        # Save report to the temporary file
-        with open(path, 'w', encoding='utf-8') as file:
-            file.write(format_report_as_text(report))
-        
-        # Return the results
-        return jsonify({
-            'similarity_scores': {
-                'cosine_similarity': f"{report['plagiarism_score']}%",
-                'jaccard_similarity': f"{report['content_score']}%",
-                'average_similarity': f"{report['average_score']}%"
-            },
-            'plagiarism_level': report['plagiarism_level'],
-            'highlighted_content': report['highlighted_content'],
-            'report_path': path
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        # Clean up uploaded file
-        try:
-            os.remove(original_path)
-        except:
-            pass
-
-@app.route('/download-report/<path:report_path>')
-def download_report(report_path):
-    return send_file(report_path, as_attachment=True, download_name="plagiarism_report.txt")
-
-def analyze_plagiarism(text):
-    
-    # Preprocess text
-    preprocessed_text = preprocess_text(text)
-    
-    # Calculate plagiarism metrics
-    tfidf_score = calculate_tfidf_score(preprocessed_text)
-    uniqueness_score = calculate_uniqueness_score(preprocessed_text)
-    content_score = calculate_content_score(preprocessed_text)
-    
-    # Calculate average score
-    average_score = (tfidf_score + uniqueness_score + content_score) / 3
-    
-    # Determine plagiarism level
-    plagiarism_level = determine_plagiarism_level(average_score)
-    
-    # Highlight potentially plagiarized content
-    highlighted_content = identify_suspicious_sentences(text)
-    
-    # Create report
-    report = {
-        'plagiarism_score': round(tfidf_score, 2),
-        'uniqueness_score': round(uniqueness_score, 2),
-        'content_score': round(content_score, 2),
-        'average_score': round(average_score, 2),
-        'plagiarism_level': plagiarism_level,
-        'highlighted_content': highlighted_content
-    }
-    
-    return report
-
 def preprocess_text(text):
-
     text = text.lower()
     
     # Remove punctuation and special characters
@@ -167,7 +100,6 @@ def preprocess_text(text):
     return ' '.join(filtered_tokens)
 
 def calculate_tfidf_score(text):
-   
     # Common phrases in academic writing
     common_phrases = [
         "this paper presents", "in this study", "according to the results",
@@ -201,7 +133,6 @@ def calculate_tfidf_score(text):
     return max(0, min(100, plagiarism_score))
 
 def calculate_uniqueness_score(text):
-    
     words = text.split()
     
     if not words:
@@ -227,7 +158,6 @@ def calculate_uniqueness_score(text):
     return max(0, min(100, plagiarism_score))
 
 def calculate_content_score(text):
-    
     # Complexity factor calculation
     words = text.split()
     
@@ -252,7 +182,6 @@ def calculate_content_score(text):
     return max(0, min(100, plagiarism_score))
 
 def determine_plagiarism_level(score):
-    
     if score < 20:
         return "Low"
     elif score < 40:
@@ -263,7 +192,6 @@ def determine_plagiarism_level(score):
         return "Very High"
 
 def identify_suspicious_sentences(text):
-    
     # Split text into sentences
     sentences = sent_tokenize(text)
     
@@ -319,40 +247,215 @@ def identify_suspicious_sentences(text):
     
     return suspicious_sentences
 
-def format_report_as_text(report):
+def analyze_plagiarism(text):
+    # Preprocess text
+    preprocessed_text = preprocess_text(text)
     
-    # Prepare the report text
-    report_text = []
-    report_text.append("=== PLAGIARISM DETECTION REPORT ===")
-    report_text.append("")
-    report_text.append(f"Plagiarism Level: {report['plagiarism_level']}")
-    report_text.append("")
-    report_text.append("Analysis Scores:")
-    report_text.append(f"- Content Analysis: {report['content_score']}%")
-    report_text.append(f"- Uniqueness Analysis: {report['uniqueness_score']}%")
-    report_text.append(f"- Textual Pattern Analysis: {report['plagiarism_score']}%")
-    report_text.append(f"- Overall Plagiarism Score: {report['average_score']}%")
-    report_text.append("")
+    # Calculate plagiarism metrics
+    tfidf_score = calculate_tfidf_score(preprocessed_text)
+    uniqueness_score = calculate_uniqueness_score(preprocessed_text)
+    content_score = calculate_content_score(preprocessed_text)
     
+    # Calculate average score
+    average_score = (tfidf_score + uniqueness_score + content_score) / 3
+    
+    # Determine plagiarism level
+    plagiarism_level = determine_plagiarism_level(average_score)
+    
+    # Highlight potentially plagiarized content
+    highlighted_content = identify_suspicious_sentences(text)
+    
+    # Create report
+    report = {
+        'plagiarism_score': round(tfidf_score, 2),
+        'uniqueness_score': round(uniqueness_score, 2),
+        'content_score': round(content_score, 2),
+        'average_score': round(average_score, 2),
+        'plagiarism_level': plagiarism_level,
+        'highlighted_content': highlighted_content
+    }
+    
+    return report
+
+def generate_pdf_report(report, output_path):
+    doc = SimpleDocTemplate(output_path, pagesize=letter)
+    styles = getSampleStyleSheet()
+    
+    # Create custom styles
+    title_style = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontSize=16,
+        textColor=colors.darkblue,
+        spaceAfter=12
+    )
+    
+    heading_style = ParagraphStyle(
+        'Heading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.darkblue,
+        spaceAfter=6
+    )
+    
+    normal_style = styles['Normal']
+    
+    # Content elements for the PDF
+    elements = []
+    
+    # Title
+    elements.append(Paragraph("PLAGIARISM DETECTION REPORT", title_style))
+    elements.append(Spacer(1, 0.25 * inch))
+    
+    # Plagiarism Level
+    elements.append(Paragraph(f"Plagiarism Level: {report['plagiarism_level']}", heading_style))
+    elements.append(Spacer(1, 0.15 * inch))
+    
+    # Analysis Scores
+    elements.append(Paragraph("Analysis Scores:", heading_style))
+    
+    # Create a table for scores
+    scores_data = [
+        ["Metric", "Score"],
+        ["Content Analysis", f"{report['content_score']}%"],
+        ["Uniqueness Analysis", f"{report['uniqueness_score']}%"],
+        ["Textual Pattern Analysis", f"{report['plagiarism_score']}%"],
+        ["Overall Plagiarism Score", f"{report['average_score']}%"]
+    ]
+    
+    # Color mapping for plagiarism level
+    level_color = {
+        "Low": colors.green,
+        "Moderate": colors.orange,
+        "High": colors.red,
+        "Very High": colors.darkred
+    }
+    
+    # Create the scores table
+    scores_table = Table(scores_data, colWidths=[3*inch, 1.5*inch])
+    scores_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (1, 0), colors.black),
+        ('ALIGN', (0, 0), (1, 0), 'CENTER'),
+        ('ALIGN', (1, 1), (1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (1, 0), 8),
+        ('BACKGROUND', (0, -1), (1, -1), colors.lightgrey),
+        ('GRID', (0, 0), (1, -1), 1, colors.black),
+    ]))
+    
+    elements.append(scores_table)
+    elements.append(Spacer(1, 0.25 * inch))
+    
+    # Highlighted Content
     if report['highlighted_content']:
-        report_text.append("Potentially Plagiarized Content:")
-        report_text.append("----------------------------------")
+        elements.append(Paragraph("Potentially Plagiarized Content:", heading_style))
+        elements.append(Spacer(1, 0.15 * inch))
         
         for i, match in enumerate(report['highlighted_content']):
             sus_sentence = match['suspicious_sentence']
             orig_sentence = match['original_sentence']
             similarity = match['similarity_ratio'] * 100
             
-            report_text.append(f"Match #{i+1} (Likelihood: {similarity:.2f}%):")
-            report_text.append("Text:")
-            report_text.append(f"  {sus_sentence}")
-            report_text.append("Note:")
-            report_text.append(f"  {orig_sentence}")
-            report_text.append("")
+            elements.append(Paragraph(f"Match #{i+1} (Likelihood: {similarity:.2f}%)", styles['Heading3']))
+            elements.append(Paragraph(f"<b>Text:</b> {sus_sentence}", normal_style))
+            elements.append(Paragraph(f"<b>Note:</b> {orig_sentence}", normal_style))
+            elements.append(Spacer(1, 0.15 * inch))
     else:
-        report_text.append("No significant plagiarism detected.")
+        elements.append(Paragraph("No significant plagiarism detected.", normal_style))
     
-    return '\n'.join(report_text)
+    # Build the PDF
+    doc.build(elements)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/check-text', methods=['POST'])
+def check_text():
+    # Get original text from the form
+    original_text = request.form.get('original_text', '')
+    
+    if not original_text:
+        return jsonify({'error': 'Text is required'}), 400
+    
+    # Analyze text for plagiarism
+    report = analyze_plagiarism(original_text)
+    
+    # Generate temporary file for the report (now with .pdf extension)
+    fd, path = tempfile.mkstemp(suffix='.pdf', prefix='report_')
+    os.close(fd)
+    
+    # Save report to the temporary file as PDF
+    generate_pdf_report(report, path)
+    
+    # Return the results
+    return jsonify({
+        'similarity_scores': {
+            'cosine_similarity': f"{report['plagiarism_score']}%",
+            'jaccard_similarity': f"{report['content_score']}%", 
+            'average_similarity': f"{report['average_score']}%"
+        },
+        'plagiarism_level': report['plagiarism_level'],
+        'highlighted_content': report['highlighted_content'],
+        'report_path': path
+    })
+
+@app.route('/check-files', methods=['POST'])
+def check_files():
+    # Check if file was uploaded
+    if 'original_file' not in request.files:
+        return jsonify({'error': 'File is required'}), 400
+    
+    original_file = request.files['original_file']
+    
+    # Check if filename is empty
+    if original_file.filename == '':
+        return jsonify({'error': 'File is required'}), 400
+    
+    # Save the uploaded file
+    original_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(original_file.filename))
+    original_file.save(original_path)
+    
+    try:
+        # Extract text from file
+        file_text = file_handler.extract_text_from_file(original_path)
+        
+        # Analyze text for plagiarism
+        report = analyze_plagiarism(file_text)
+        
+        # Generate temporary file for the report (now with .pdf extension)
+        fd, path = tempfile.mkstemp(suffix='.pdf', prefix='report_')
+        os.close(fd)
+        
+        # Save report to the temporary file as PDF
+        generate_pdf_report(report, path)
+        
+        # Return the results
+        return jsonify({
+            'similarity_scores': {
+                'cosine_similarity': f"{report['plagiarism_score']}%",
+                'jaccard_similarity': f"{report['content_score']}%",
+                'average_similarity': f"{report['average_score']}%"
+            },
+            'plagiarism_level': report['plagiarism_level'],
+            'highlighted_content': report['highlighted_content'],
+            'report_path': path
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        # Clean up uploaded file
+        try:
+            os.remove(original_path)
+        except:
+            pass
+
+@app.route('/download-report/<path:report_path>')
+def download_report(report_path):
+    # Updated to reflect PDF format
+    return send_file(report_path, as_attachment=True, download_name="plagiarism_report.pdf")
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)
