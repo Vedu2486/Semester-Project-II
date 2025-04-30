@@ -1,0 +1,8 @@
+- Jurafsky, D., & Martin, J. H. *Speech and Language Processing*. Pearson.
+- Manning, C. D., Raghavan, P., & Schütze, H. *Introduction to Information Retrieval*. Cambridge University Press.
+- Scikit-learn documentation: https://scikit-learn.org
+- NLTK documentation: https://www.nltk.org
+- PyPDF2: https://github.com/py-pdf/PyPDF2
+- “Levenshtein Distance Explained” – Towards Data Science, Medium
+- GitHub Repositories for Text Similarity Algorithms
+- Turnitin and Grammarly Official Sites
