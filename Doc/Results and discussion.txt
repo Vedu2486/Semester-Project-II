@@ -1,0 +1,37 @@
+**Results**
+
+The Simple Plagiarism Checker achieved the following:
+
+- **High Accuracy** in detecting directly copied and partially modified content.
+- **Fast Processing**: Compared two 600-word documents in less than 2 seconds.
+- **Support for Multiple File Formats**: TXT, DOCX, PDF handled with ease.
+- **Plagiarism Report**: Generates similarity scores with highlighted matching text.
+
+Sample Test Outcomes:
+
+- Identical documents: 100% similarity.
+- Paraphrased content: 60–75% similarity detected.
+- Completely unique documents: Below 20% similarity.
+
+**Discussions**
+
+- The tool performs well for academic assignments and short reports.
+- Cosine Similarity provides the most consistent results for large paragraphs.
+- Levenshtein Distance is useful for minor edits and substitutions.
+- Jaccard Index is sensitive to sentence structure, improving detection of reshuffled sentences.
+
+**Challenges Faced**
+
+- Handling large documents required memory optimization.
+- PDF formatting sometimes introduced hidden characters.
+- Balancing between false positives and missed similarities was a key tuning step.
+
+**Improvements for the Future**
+
+- Integration with online databases to detect web-based plagiarism.
+- Use of semantic similarity models like BERT for advanced paraphrasing.
+- Adding support for other languages like Hindi, Marathi, etc.
+- Web-based deployment for broader access.
+
+---
+
