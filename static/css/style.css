@@ -1,85 +1,135 @@
-/* Main styling */
+/* Main styling - Complete redesign */
 body {
-    background-color: #f8f9fa;
+    background-color: #1a1a2e; /* Dark navy background */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e9e9ec;
 }
 
 h1 {
-    color: #343a40;
-    font-weight: 600;
+    color: #ff9a76; /* Vibrant coral heading */
+    font-weight: 700;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.lead {
+    color: #c3c3d0;
 }
 
 .card {
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     border: none;
+    background-color: #16213e; /* Dark blue card background */
+    color: #e9e9ec;
 }
 
 .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #0f3460; /* Darker blue header */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e9e9ec;
 }
 
 /* Tab styling */
+.nav-tabs {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .nav-tabs .nav-link {
-    color: #495057;
+    color: #c3c3d0;
     font-weight: 500;
+    border: none;
 }
 
 .nav-tabs .nav-link.active {
-    color: #0d6efd;
+    color: #ff9a76; /* Coral active tab */
     font-weight: 600;
+    background-color: transparent;
+    border-bottom: 3px solid #ff9a76;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
 }
 
 /* Form elements */
 .form-control {
-    border: 1px solid #ced4da;
-    border-radius: 4px;
+    border: 1px solid #2e4057;
+    border-radius: 8px;
+    background-color: #2a3c58;
+    color: #e9e9ec;
+    padding: 12px;
+}
+
+.form-control:focus {
+    background-color: #2a3c58;
+    border-color: #ff9a76;
+    color: #e9e9ec;
+    box-shadow: 0 0 0 0.2rem rgba(255, 154, 118, 0.25);
+}
+
+.form-label {
+    color: #c3c3d0;
 }
 
 textarea.form-control {
     resize: vertical;
 }
 
+/* Button styling */
 .btn-primary {
-    background-color: #0d6efd;
+    background-color: #ff9a76; /* Coral primary button */
     border: none;
-    padding: 8px 20px;
-    border-radius: 4px;
-    font-weight: 500;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #16213e;
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: #0b5ed7;
+    background-color: #ff8a66;
+    box-shadow: 0 5px 15px rgba(255, 154, 118, 0.4);
+    transform: translateY(-2px);
 }
 
 .btn-success {
-    background-color: #198754;
+    background-color: #7ed957; /* Lime green success button */
     border: none;
-    padding: 8px 20px;
-    border-radius: 4px;
-    font-weight: 500;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #16213e;
+    transition: all 0.3s ease;
 }
 
 .btn-success:hover {
-    background-color: #157347;
+    background-color: #6bc044;
+    box-shadow: 0 5px 15px rgba(126, 217, 87, 0.4);
+    transform: translateY(-2px);
 }
 
 /* Feature icons */
 .feature-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background-color: #e9ecef;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background-color: #0f3460; /* Dark blue background */
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.feature-icon:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 .feature-icon i {
-    font-size: 24px;
-    color: #0d6efd;
+    font-size: 32px;
+    color: #ff9a76; /* Coral icon color */
 }
 
 /* Results section */
@@ -87,16 +137,32 @@ textarea.form-control {
     max-height: 400px;
     overflow-y: auto;
     margin-top: 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 1rem;
-    background-color: #f8f9fa;
+    border: 1px solid #2e4057;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background-color: #1e2a45; /* Slightly lighter blue */
+    scrollbar-width: thin;
+    scrollbar-color: #ff9a76 #2e4057;
+}
+
+.matches-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.matches-container::-webkit-scrollbar-track {
+    background: #2e4057;
+    border-radius: 8px;
+}
+
+.matches-container::-webkit-scrollbar-thumb {
+    background-color: #ff9a76;
+    border-radius: 8px;
 }
 
 .match-item {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #2e4057;
 }
 
 .match-item:last-child {
@@ -107,43 +173,86 @@ textarea.form-control {
 
 .match-percentage {
     font-weight: 600;
-    color: #0d6efd;
+    color: #ff9a76; /* Coral percentage */
 }
 
 .match-text {
-    background-color: #ffffff;
-    padding: 10px;
-    border-radius: 4px;
-    border-left: 3px solid #0d6efd;
-    margin-top: 5px;
+    background-color: #2a3c58;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 5px solid #ff9a76; /* Coral border */
+    margin-top: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Badge styling */
 .badge {
-    padding: 6px 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 30px; /* Very rounded pill badges */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .bg-success {
-    background-color: #198754 !important;
+    background-color: #7ed957 !important; /* Lime green */
 }
 
 .bg-warning {
-    background-color: #ffc107 !important;
-    color: #212529;
+    background-color: #ffbd69 !important; /* Amber */
+    color: #16213e !important;
 }
 
 .bg-danger {
-    background-color: #dc3545 !important;
+    background-color: #e05260 !important; /* Raspberry red */
 }
 
 .bg-dark {
-    background-color: #6c757d !important;
+    background-color: #9376e0 !important; /* Purple for very high */
 }
 
 /* Footer */
 .footer {
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
+    background-color: #0f3460; /* Dark blue footer */
+    border-top: none;
+    color: #c3c3d0 !important;
+    padding: 1.5rem 0;
+}
+
+.footer .text-muted {
+    color: #c3c3d0 !important;
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#results-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+/* Chart styling overrides */
+canvas {
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+/* Additional styling for better dark mode */
+.text-center {
+    color: #e9e9ec;
+}
+
+h5, h6 {
+    color: #e9e9ec;
+}
+
+strong {
+    color: #ffbd69; /* Amber for emphasis */
 }
